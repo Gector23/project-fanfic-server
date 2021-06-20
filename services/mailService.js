@@ -14,11 +14,14 @@ exports.sendActivationMail = async (to, activationLink) => {
   await mailTransporter.sendMail({
     from: process.env.SMTP_USER,
     to,
-    subject: `Account activation on ${process.env.API_URL}`,
+    subject: `Account activation on ${process.env.CLIENT_URL}`,
     text: "",
     html: `
       <div>
-        <p>To activate follow <a href="${activationLink}">link</a></p>
+        <p>
+          To activate follow 
+          <a href="${`${process.env.CLIENT_URL}/activate?activationLink=${activationLink}`}">link</a>
+        </p>
       </div>
     `
   });

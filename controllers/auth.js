@@ -6,7 +6,7 @@ const mailService = require("../services/mailService");
 
 const User = require("../models/user");
 
-exports.signup = async (req, res, next) => {
+exports.signUp = async (req, res, next) => {
   try {
     const { email, login, password } = req.body;
     const candidate = await User.findOne({ email });
@@ -15,22 +15,38 @@ exports.signup = async (req, res, next) => {
     }
     const hashPassword = await bcrypt.hash(password, 10);
     const activationLink = uuid.v4();
-    await User.create({
+    const user = await User.create({
       email,
       login,
       password: hashPassword,
       activationLink
     });
-    await mailService.sendActivationMail(email, `${process.env.API_URL}/api/auth/activate/${activationLink}`);
+    await mailService.sendActivationMail(email, activationLink);
+    const tokens = tokenService.generateTokens({
+      id: user._id,
+      email: user.email
+    });
+    await tokenService.saveRefreshToken(user._id, tokens.refreshToken);
+    res.cookie("refreshToken", tokens.refreshToken, {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true
+    });
     return res.status(201).json({
-      message: "User created."
+      message: "User created.",
+      accessToken: tokens.accessToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        isActivated: user.isActivated,
+        isAdmin: user.isAdmin
+      }
     });
   } catch (err) {
     next(err);
   }
 };
 
-exports.signin = async (req, res, next) => {
+exports.signIn = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -56,6 +72,7 @@ exports.signin = async (req, res, next) => {
       user: {
         id: user._id,
         email: user.email,
+        isActivated: user.isActivated,
         isAdmin: user.isAdmin
       }
     });
@@ -64,7 +81,7 @@ exports.signin = async (req, res, next) => {
   }
 };
 
-exports.signout = async (req, res, next) => {
+exports.signOut = async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
     await tokenService.removeRefreshToken(refreshToken);
@@ -79,7 +96,7 @@ exports.signout = async (req, res, next) => {
 
 exports.activate = async (req, res, next) => {
   try {
-    const activationLink = req.params.link;
+    const activationLink = req.query.activationLink;
     const user = await User.findOne({ activationLink });
     if (!user) {
       throw new Error("Incorrect activation link.");
@@ -89,7 +106,7 @@ exports.activate = async (req, res, next) => {
       await user.save();
     };
     res.status(200).json({
-      message: "User activated."
+      message: "Account activated."
     });
   } catch (err) {
     next(err);
@@ -120,6 +137,7 @@ exports.refresh = async (req, res, next) => {
       user: {
         id: user._id,
         email: user.email,
+        isActivated: user.isActivated,
         isAdmin: user.isAdmin
       }
     });

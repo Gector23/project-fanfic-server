@@ -19,6 +19,6 @@ const server = http.createServer(app);
 server.on("error", (err) => {
   console.log(err);
 });
-server.listen(5000, () => {
+server.listen(PORT, () => {
   console.log(`Server started on PORT: ${PORT}`)
 });
