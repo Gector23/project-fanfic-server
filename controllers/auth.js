@@ -117,7 +117,7 @@ exports.refresh = async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
     const tokenPayload = tokenService.verifyToken(refreshToken, process.env.JWT_REFRESH_SECRET);
-    const token = tokenService.findRefreshToken(refreshToken);
+    const token = await tokenService.findRefreshToken(refreshToken);
     if (!tokenPayload || !token) {
       throw new Error("Auth failed.");
     }

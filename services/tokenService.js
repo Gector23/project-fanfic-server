@@ -31,14 +31,14 @@ exports.saveRefreshToken = async (user, refreshToken) => {
   const token = await Token.findOne({ user });
   if (token) {
     token.refreshToken = refreshToken;
-    await token.save();
+    return await token.save();
   } else {
-    await Token.create({ user: user._id, refreshToken });
+    return await Token.create({ user: user._id, refreshToken });
   }
 };
 
 exports.removeRefreshToken = async refreshToken => {
-  await Token.deleteOne({ refreshToken });
+  return await Token.deleteOne({ refreshToken });
 };
 
 exports.findRefreshToken = async refreshToken => {
