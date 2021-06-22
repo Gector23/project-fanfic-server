@@ -37,8 +37,11 @@ exports.signUp = async (req, res, next) => {
       user: {
         id: user._id,
         email: user.email,
+        login: user.login,
         isActivated: user.isActivated,
-        isAdmin: user.isAdmin
+        isAdmin: user.isAdmin,
+        signUp: user.signUp,
+        lastSignIn: user.lastSignIn
       }
     });
   } catch (err) {
@@ -66,14 +69,21 @@ exports.signIn = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true
     });
+    const isFirstSignIn = !user.lastSignIn;
+    user.lastSignIn = Date.now();
+    await user.save();
     return res.status(200).json({
       message: "Successful sign in.",
       accessToken: tokens.accessToken,
+      isFirstSignIn,
       user: {
         id: user._id,
         email: user.email,
+        login: user.login,
         isActivated: user.isActivated,
-        isAdmin: user.isAdmin
+        isAdmin: user.isAdmin,
+        signUp: user.signUp,
+        lastSignIn: user.lastSignIn
       }
     });
   } catch (err) {
@@ -137,8 +147,11 @@ exports.refresh = async (req, res, next) => {
       user: {
         id: user._id,
         email: user.email,
+        login: user.login,
         isActivated: user.isActivated,
-        isAdmin: user.isAdmin
+        isAdmin: user.isAdmin,
+        signUp: user.signUp,
+        lastSignIn: user.lastSignIn
       }
     });
   } catch (err) {
