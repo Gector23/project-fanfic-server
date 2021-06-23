@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 const authRouter = require("./routes/auth");
+const preferenceRouter = require("./routes/preference");
 
 const checkError = require("./middleware/check-error");
 
@@ -16,6 +17,7 @@ app.use(cors({
   origin: process.env.CLIENT_URL
 }));
 app.use("/api/auth", authRouter);
+app.use("/api/preference", preferenceRouter)
 app.use(checkError);
 
 module.exports = app;
