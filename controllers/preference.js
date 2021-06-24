@@ -1,4 +1,5 @@
 const Preference = require("../models/preference");
+const User = require("../models/user");
 
 exports.setPreferences = async (req, res, next) => {
   try {
@@ -10,6 +11,7 @@ exports.setPreferences = async (req, res, next) => {
       await preferences.save();
     } else {
       await Preference.create({ user, fandoms });
+      await User.findByIdAndUpdate(user, { isInitializedPreferences: true });
     }
     return res.status(200).json({
       message: "Preference set."
