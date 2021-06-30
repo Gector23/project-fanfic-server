@@ -26,6 +26,16 @@ module.exports = (err, req, res, next) => {
         message: err.message
       });
       break;
+    case "Fanfic not found.":
+      res.status(404).json({
+        message: err.message
+      });
+      break;
+    case "Chapter not found.":
+      res.status(404).json({
+        message: err.message
+      });
+      break;
     default:
       res.status(500).json({
         message: "Internal Server Error."

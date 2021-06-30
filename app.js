@@ -5,7 +5,10 @@ const cors = require("cors");
 
 const authRouter = require("./routes/auth");
 const preferenceRouter = require("./routes/preference");
+const fanficRouter = require("./routes/fanfic");
+const chapterRouter = require("./routes/chapter");
 const fandomRouter = require("./routes/fandom");
+const tagRouter = require("./routes/tag");
 
 const checkError = require("./middleware/check-error");
 
@@ -19,7 +22,10 @@ app.use(cors({
 }));
 app.use("/api/auth", authRouter);
 app.use("/api/preference", preferenceRouter);
+app.use("/api/fanfic", fanficRouter);
+app.use("/api/chapter", chapterRouter);
 app.use("/api/fandom", fandomRouter);
+app.use("/api/tag", tagRouter);
 app.use(checkError);
 
 module.exports = app;
