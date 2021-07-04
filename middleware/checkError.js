@@ -36,6 +36,16 @@ module.exports = (err, req, res, next) => {
         message: err.message
       });
       break;
+    case "Already liked.":
+      res.status(400).json({
+        message: err.message
+      });
+      break;
+    case "Not liked.":
+      res.status(400).json({
+        message: err.message
+      });
+      break;
     default:
       res.status(500).json({
         message: "Internal Server Error."

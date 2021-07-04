@@ -2,9 +2,11 @@ const Fanfic = require("../models/fanfic");
 const Chapter = require("../models/chapter");
 const Tag = require("../models/tag");
 
+const rateService = require("../services/rateService");
+
 exports.create = async (req, res, next) => {
   try {
-    const user = req.userData.id;
+    const user = req.userData._id;
     const { name, fandom, description, tags } = req.body;
     let fanficTags = [];
     for (tag of tags) {
@@ -33,6 +35,7 @@ exports.create = async (req, res, next) => {
 
 exports.getFanfic = async (req, res, next) => {
   try {
+    const user = req.userData?._id;
     const fanficId = req.params.fanficId;
     const fanfic = await Fanfic.findById(fanficId)
       .populate({ path: "user", select: "_id login" })
@@ -43,11 +46,16 @@ exports.getFanfic = async (req, res, next) => {
     }
     const chapters = await Chapter.find({ fanfic: fanfic._id }, "_id name")
       .sort({ number: 1 });
-    fanfic.chapters = chapters;
+    let userRate = null;
+    if (user) {
+      const rate = await rateService.getRate(user, fanficId);
+      userRate = rate.value;
+    }
     return res.status(200).json({
       message: "Successful fanfic query.",
       fanfic,
-      chapters
+      chapters,
+      userRate
     });
   } catch (err) {
     next(err);
@@ -103,6 +111,32 @@ exports.update = async (req, res, next) => {
     await fanfic.save();
     return res.status(200).json({
       message: "Successful fanfic update."
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.rate = async (req, res, next) => {
+  try {
+    const user = req.userData._id;
+    const fanficId = req.params.fanficId;
+    const { value } = req.body;
+    const fanfic = await Fanfic.findById(fanficId, "rating ratesCount");
+    if (!fanfic) {
+      throw new Error("Fanfic not found.");
+    }
+    const rate = await rateService.getRate(user, fanficId);
+    await rateService.setRate(user, fanficId, value, rate?._id);
+    if (rate) {
+      fanfic.rating = ((fanfic.rating * fanfic.ratesCount - rate.value + value) / fanfic.ratesCount).toFixed(1);
+    } else {
+      fanfic.rating = ((fanfic.rating * fanfic.ratesCount + value) / (fanfic.ratesCount + 1)).toFixed(1);
+      fanfic.ratesCount++;
+    }
+    await fanfic.save();
+    return res.status(200).json({
+      message: "Rate!"
     });
   } catch (err) {
     next(err);

@@ -1,6 +1,8 @@
 const Fanfic = require("../models/fanfic");
 const Chapter = require("../models/chapter");
 
+const likeService = require("../services/likeService");
+
 exports.create = async (req, res, next) => {
   try {
     const { name, content, fanfic } = req.body;
@@ -23,14 +25,20 @@ exports.create = async (req, res, next) => {
 
 exports.getChapter = async (req, res, next) => {
   try {
+    const user = req.userData?._id;
     const chapterId = req.params.chapterId;
     const chapter = await Chapter.findById(chapterId);
     if (!chapter) {
       throw new Error("Chapter not found.");
     }
+    let isLiked = false;
+    if (user) {
+      isLiked = await likeService.isLiked(user, chapterId);
+    }
     return res.status(200).json({
       message: "Successful chapter query.",
-      chapter
+      chapter,
+      isLiked
     });
   } catch (err) {
     next(err);
@@ -99,6 +107,52 @@ exports.move = async (req, res, next) => {
     await Fanfic.findByIdAndUpdate(movingChapter.fanfic, { lastUpdate: Date.now() });
     return res.status(200).json({
       message: "Successful chapter move."
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.like = async (req, res, next) => {
+  try {
+    const user = req.userData._id;
+    const chapterId = req.params.chapterId;
+    const chapter = await Chapter.findById(chapterId, "likesCount");
+    if (!chapter) {
+      throw new Error("Chapter not found.");
+    }
+    const isLiked = await likeService.isLiked(user, chapterId);
+    if (isLiked) {
+      throw new Error("Already liked.");
+    }
+    await likeService.setLike(user, chapterId);
+    chapter.likesCount++;
+    await chapter.save();
+    return res.status(200).json({
+      message: "Like!"
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.unlike = async (req, res, next) => {
+  try {
+    const user = req.userData._id;
+    const chapterId = req.params.chapterId;
+    const chapter = await Chapter.findById(chapterId, "likesCount");
+    if (!chapter) {
+      throw new Error("Chapter not found.");
+    }
+    const isLiked = await likeService.isLiked(user, chapterId);
+    if (!isLiked) {
+      throw new Error("Not liked.");
+    }
+    await likeService.removeLike(user, chapterId);
+    chapter.likesCount--;
+    await chapter.save();
+    return res.status(200).json({
+      message: "Unlike!"
     });
   } catch (err) {
     next(err);

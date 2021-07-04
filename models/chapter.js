@@ -5,7 +5,8 @@ const chapterSchema = mongoose.Schema({
   name: { type: String, required: true, maxLength: 80 },
   content: { type: String },
   number: { type: Number, required: true },
-  lastUpdate: { type: Date, default: Date.now }
+  lastUpdate: { type: Date, default: Date.now },
+  likesCount: { type: Number, default: 0 }
 });
 
 module.exports = mongoose.model("Chapter", chapterSchema);

@@ -23,7 +23,7 @@ exports.signUp = async (req, res, next) => {
     });
     await mailService.sendActivationMail(email, activationLink);
     const tokens = tokenService.generateTokens({
-      id: user._id,
+      _id: user._id,
       email: user.email
     });
     await tokenService.saveRefreshToken(user._id, tokens.refreshToken);
@@ -62,7 +62,7 @@ exports.signIn = async (req, res, next) => {
       throw new Error("Incorrect password.");
     }
     const tokens = tokenService.generateTokens({
-      id: user._id,
+      _id: user._id,
       email: user.email
     });
     await tokenService.saveRefreshToken(user._id, tokens.refreshToken);
@@ -131,9 +131,9 @@ exports.refresh = async (req, res, next) => {
     if (!tokenPayload || !token) {
       throw new Error("Auth failed.");
     }
-    const user = await User.findById(tokenPayload.id);
+    const user = await User.findById(tokenPayload._id);
     const tokens = tokenService.generateTokens({
-      id: user._id,
+      _id: user._id,
       email: user.email
     });
     await tokenService.saveRefreshToken(user._id, tokens.refreshToken);

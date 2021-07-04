@@ -10,7 +10,7 @@ const chapterRouter = require("./routes/chapter");
 const fandomRouter = require("./routes/fandom");
 const tagRouter = require("./routes/tag");
 
-const checkError = require("./middleware/check-error");
+const checkError = require("./middleware/checkError");
 
 const app = express();
 
