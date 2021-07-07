@@ -6,9 +6,11 @@ const userSchema = mongoose.Schema({
   password: {type: String, required: true},
   isActivated: {type: Boolean, default: false},
   isInitializedPreferences: {type: Boolean, default: false},
+  preferences : [{ type: mongoose.Schema.Types.ObjectId, ref: "Fandom", default: [] }],
   isAdmin: {type: Boolean, default: false},
   signUp: {type: Date, default: Date.now},
-  lastSignIn: {type: Date, default: null},
+  lastSignIn: {type: Date, default: Date.now},
+  lastUpdate: { type: Date, default: Date.now },
   activationLink: {type: String}
 });
 

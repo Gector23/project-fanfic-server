@@ -16,7 +16,8 @@ exports.create = async (req, res, next) => {
     await Fanfic.findByIdAndUpdate(chapter.fanfic, { lastUpdate: Date.now() });
     return res.status(200).json({
       message: "Chapter added.",
-      chapter
+      chapter,
+      isLiked: null
     });
   } catch (err) {
     next(err);

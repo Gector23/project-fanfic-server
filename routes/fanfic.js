@@ -1,17 +1,19 @@
 const express = require("express");
 
-const authData = require("../middleware/authData");
 const checkAuth = require("../middleware/checkAuth");
 
 const fanficController = require("../controllers/fanfic");
 
 const router = express.Router();
 
-router.post("/create", authData, checkAuth, fanficController.create);
-router.get("/:fanficId", authData, fanficController.getFanfic);
-router.get("/last-update/:fanficId", fanficController.getFanficUpdate);
-router.patch("/update/:fanficId", authData, checkAuth, fanficController.update);
-router.post("/:fanficId/rate", authData, checkAuth, fanficController.rate);
-router.delete("/:fanficId", authData, checkAuth, fanficController.delete);
+router.post("/create", checkAuth, fanficController.create);
+router.get("/:fanficId", fanficController.getFanfic);
+router.get("/:fanficId/last-update", fanficController.getFanficUpdate);
+router.get("/:fanficId/chapters", fanficController.getFanficChapters);
+router.patch("/update/:fanficId", checkAuth, fanficController.update);
+router.post("/:fanficId/rate", checkAuth, fanficController.rate);
+router.get("/:fanficId/set-favorite", checkAuth, fanficController.setFavorite);
+router.get("/:fanficId/remove-favorite", checkAuth, fanficController.removeFavorite);
+router.delete("/:fanficId", checkAuth, fanficController.delete);
 
 module.exports = router;

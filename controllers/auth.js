@@ -36,13 +36,10 @@ exports.signUp = async (req, res, next) => {
       accessToken: tokens.accessToken,
       user: {
         _id: user._id,
-        email: user.email,
         login: user.login,
         isActivated: user.isActivated,
         isInitializedPreferences: user.isInitializedPreferences,
         isAdmin: user.isAdmin,
-        signUp: user.signUp,
-        lastSignIn: user.lastSignIn
       }
     });
   } catch (err) {
@@ -77,13 +74,10 @@ exports.signIn = async (req, res, next) => {
       accessToken: tokens.accessToken,
       user: {
         _id: user._id,
-        email: user.email,
         login: user.login,
         isActivated: user.isActivated,
         isInitializedPreferences: user.isInitializedPreferences,
-        isAdmin: user.isAdmin,
-        signUp: user.signUp,
-        lastSignIn: user.lastSignIn
+        isAdmin: user.isAdmin
       }
     });
   } catch (err) {
@@ -146,13 +140,10 @@ exports.refresh = async (req, res, next) => {
       accessToken: tokens.accessToken,
       user: {
         _id: user._id,
-        email: user.email,
         login: user.login,
         isActivated: user.isActivated,
         isInitializedPreferences: user.isInitializedPreferences,
-        isAdmin: user.isAdmin,
-        signUp: user.signUp,
-        lastSignIn: user.lastSignIn
+        isAdmin: user.isAdmin
       }
     });
   } catch (err) {

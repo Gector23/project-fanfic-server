@@ -2,7 +2,9 @@ const Fanfic = require("../models/fanfic");
 const Chapter = require("../models/chapter");
 const Tag = require("../models/tag");
 
+const userService = require("../services/userService");
 const rateService = require("../services/rateService");
+const favoriteService = require("../services/favorite");
 
 exports.create = async (req, res, next) => {
   try {
@@ -26,7 +28,8 @@ exports.create = async (req, res, next) => {
     });
     return res.status(200).json({
       message: "Successful creation of fanfic.",
-      fanfic
+      fanfic,
+      userRate: null
     });
   } catch (err) {
     next(err);
@@ -35,7 +38,7 @@ exports.create = async (req, res, next) => {
 
 exports.getFanfic = async (req, res, next) => {
   try {
-    const user = req.userData?._id;
+    const user = req.userData._id;
     const fanficId = req.params.fanficId;
     const fanfic = await Fanfic.findById(fanficId)
       .populate({ path: "user", select: "_id login" })
@@ -44,18 +47,10 @@ exports.getFanfic = async (req, res, next) => {
     if (!fanfic) {
       throw new Error("Fanfic not found.");
     }
-    const chapters = await Chapter.find({ fanfic: fanfic._id }, "_id name")
-      .sort({ number: 1 });
-    let userRate = null;
-    if (user) {
-      const rate = await rateService.getRate(user, fanficId);
-      userRate = rate.value;
-    }
+    const fanficRelation = await userService.fanficRelation(user, fanfic);
     return res.status(200).json({
       message: "Successful fanfic query.",
-      fanfic,
-      chapters,
-      userRate
+      fanfic: fanficRelation
     });
   } catch (err) {
     next(err);
@@ -72,6 +67,20 @@ exports.getFanficUpdate = async (req, res, next) => {
     return res.status(200).json({
       message: "Successful fanfic last update query.",
       lastUpdate: fanfic.lastUpdate
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getFanficChapters = async (req, res, next) => {
+  try {
+    const fanficId = req.params.fanficId;
+    const chapters = await Chapter.find({ fanfic: fanficId }, "_id name")
+      .sort({ number: 1 });
+    return res.status(200).json({
+      message: "Successful fanfic chapters query.",
+      chapters
     });
   } catch (err) {
     next(err);
@@ -137,6 +146,40 @@ exports.rate = async (req, res, next) => {
     await fanfic.save();
     return res.status(200).json({
       message: "Rate!"
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.setFavorite = async (req, res, next) => {
+  try {
+    const user = req.userData._id;
+    const fanficId = req.params.fanficId;
+    const isFavorite = await favoriteService.isFavorite(user, fanficId);
+    if (isFavorite) {
+      throw new Error("Already added to favorites.");
+    }
+    await favoriteService.setFavorite(user, chapterId);
+    return res.status(200).json({
+      message: "Fanfic added to favorites."
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.removeFavorite = async (req, res, next) => {
+  try {
+    const user = req.userData._id;
+    const fanficId = req.params.fanficId;
+    const isFavorite = await favoriteService.isFavorite(user, fanficId);
+    if (!isFavorite) {
+      throw new Error("Not added to favorites.");
+    }
+    await favoriteService.removeFavorite(user, chapterId);
+    return res.status(200).json({
+      message: "Fanfic removed from favorites."
     });
   } catch (err) {
     next(err);
