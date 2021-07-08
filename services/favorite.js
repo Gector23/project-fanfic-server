@@ -16,7 +16,7 @@ exports.removeFavorite = async (user, fanfic) => {
   }
 };
 
-exports.isFavorite = async (user, fanfic) => {
+exports.isFavorited = async (user, fanfic) => {
   try {
     const favorite = await Favorite.findOne({ user, fanfic });
     return favorite ? true : false;

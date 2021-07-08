@@ -156,11 +156,11 @@ exports.setFavorite = async (req, res, next) => {
   try {
     const user = req.userData._id;
     const fanficId = req.params.fanficId;
-    const isFavorite = await favoriteService.isFavorite(user, fanficId);
+    const isFavorite = await favoriteService.isFavorited(user, fanficId);
     if (isFavorite) {
       throw new Error("Already added to favorites.");
     }
-    await favoriteService.setFavorite(user, chapterId);
+    await favoriteService.setFavorite(user, fanficId);
     return res.status(200).json({
       message: "Fanfic added to favorites."
     });
@@ -173,11 +173,11 @@ exports.removeFavorite = async (req, res, next) => {
   try {
     const user = req.userData._id;
     const fanficId = req.params.fanficId;
-    const isFavorite = await favoriteService.isFavorite(user, fanficId);
+    const isFavorite = await favoriteService.isFavorited(user, fanficId);
     if (!isFavorite) {
       throw new Error("Not added to favorites.");
     }
-    await favoriteService.removeFavorite(user, chapterId);
+    await favoriteService.removeFavorite(user, fanficId);
     return res.status(200).json({
       message: "Fanfic removed from favorites."
     });

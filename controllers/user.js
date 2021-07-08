@@ -59,7 +59,7 @@ exports.setPreferences = async (req, res, next) => {
 exports.getUserFanfics = async (req, res, next) => {
   try {
     const userId = req.params.userId;
-    const fanfics = await Fanfic.find({ user: userId }, "_id name");
+    const fanfics = await Fanfic.find({ user: userId }, "_id");
     return res.status(200).json({
       message: "Successful user fanfics query.",
       fanfics
@@ -72,10 +72,10 @@ exports.getUserFanfics = async (req, res, next) => {
 exports.getUserFavorites = async (req, res, next) => {
   try {
     const userId = req.params.userId;
-    const favorites = await Favorite.find({ user: userId }, "_id name");
+    const favorites = await Favorite.find({ user: userId }, "fanfic");
     return res.status(200).json({
       message: "Successful user favorites query.",
-      favorites
+      favorites: favorites.map(favorite => ({_id: favorite.fanfic}))
     });
   } catch (err) {
     next(err);
