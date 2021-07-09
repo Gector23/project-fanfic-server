@@ -37,6 +37,7 @@ exports.signUp = async (req, res, next) => {
       user: {
         _id: user._id,
         login: user.login,
+        email: user.email,
         isActivated: user.isActivated,
         isInitializedPreferences: user.isInitializedPreferences,
         isAdmin: user.isAdmin,
@@ -75,6 +76,7 @@ exports.signIn = async (req, res, next) => {
       user: {
         _id: user._id,
         login: user.login,
+        email: user.email,
         isActivated: user.isActivated,
         isInitializedPreferences: user.isInitializedPreferences,
         isAdmin: user.isAdmin
@@ -141,6 +143,7 @@ exports.refresh = async (req, res, next) => {
       user: {
         _id: user._id,
         login: user.login,
+        email: user.email,
         isActivated: user.isActivated,
         isInitializedPreferences: user.isInitializedPreferences,
         isAdmin: user.isAdmin

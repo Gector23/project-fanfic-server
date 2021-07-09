@@ -1,5 +1,6 @@
 const Fanfic = require("../models/fanfic");
 const Chapter = require("../models/chapter");
+const Favorite = require("../models/favorite");
 const Tag = require("../models/tag");
 
 const userService = require("../services/userService");
@@ -26,6 +27,7 @@ exports.create = async (req, res, next) => {
       description,
       tags: fanficTags
     });
+    userService.userLastUpdateNow(user);
     return res.status(200).json({
       message: "Successful creation of fanfic.",
       fanfic,
@@ -161,6 +163,7 @@ exports.setFavorite = async (req, res, next) => {
       throw new Error("Already added to favorites.");
     }
     await favoriteService.setFavorite(user, fanficId);
+    userService.userLastUpdateNow(user);
     return res.status(200).json({
       message: "Fanfic added to favorites."
     });
@@ -178,6 +181,7 @@ exports.removeFavorite = async (req, res, next) => {
       throw new Error("Not added to favorites.");
     }
     await favoriteService.removeFavorite(user, fanficId);
+    userService.userLastUpdateNow(user);
     return res.status(200).json({
       message: "Fanfic removed from favorites."
     });
@@ -188,12 +192,15 @@ exports.removeFavorite = async (req, res, next) => {
 
 exports.delete = async (req, res, next) => {
   try {
+    const user = req.userData._id;
     const fanficId = req.params.fanficId;
     const fanfic = await Fanfic.findByIdAndDelete(fanficId);
     if (!fanfic) {
       throw new Error("Fanfic not found.");
     }
     await Chapter.deleteMany({ fanfic: fanfic._id });
+    await Favorite.deleteMany({ fanfic: fanfic._id });
+    userService.userLastUpdateNow(user);
     return res.status(200).json({
       message: "Successful fanfic delete."
     });
