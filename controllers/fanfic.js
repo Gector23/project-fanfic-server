@@ -49,10 +49,39 @@ exports.getFanfic = async (req, res, next) => {
     if (!fanfic) {
       throw new Error("Fanfic not found.");
     }
-    const fanficRelation = await userService.fanficRelation(user, fanfic);
+    const fanficRelations = await userService.fanficRelations(user, fanfic);
     return res.status(200).json({
       message: "Successful fanfic query.",
-      fanfic: fanficRelation
+      fanfic: fanficRelations
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getFanfics = async (req, res, next) => {
+  try {
+    const { sortField, pageSize, currentPage, preferences } = req.query;
+    let fanficsQuery;
+    let maxFanfics;
+    if (preferences) {
+      maxFanfics = await Fanfic.find({ fandom: preferences }, "_id name").countDocuments();
+      fanficsQuery = Fanfic.find({ fandom: preferences }, "_id name");
+    } else {
+      maxFanfics = await Fanfic.find({}, "_id name").countDocuments();
+      fanficsQuery = Fanfic.find({}, "_id name");
+    }
+    if (sortField) {
+      fanficsQuery.sort(`-${sortField}`);
+    }
+    if (pageSize && currentPage) {
+      fanficsQuery.skip(pageSize * (currentPage - 1)).limit(+pageSize);
+    }
+    const fanfics = await fanficsQuery;
+    return res.status(200).json({
+      message: "Successful fanfics query.",
+      data: fanfics,
+      maxFanfics
     });
   } catch (err) {
     next(err);

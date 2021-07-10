@@ -61,10 +61,27 @@ exports.setPreferences = async (req, res, next) => {
 exports.getUserFanfics = async (req, res, next) => {
   try {
     const userId = req.params.userId;
-    const fanfics = await Fanfic.find({ user: userId }, "_id name rating fandom lastUpdate");
+    const { sortField, sortDirection, pageSize, currentPage, fandom } = req.query;
+    let fanficsQuery;
+    let maxFanfics;
+    if (fandom && fandom !== "all") {
+      maxFanfics = await Fanfic.find({ user: userId, fandom }, "_id name").countDocuments();
+      fanficsQuery = Fanfic.find({ user: userId, fandom }, "_id name");
+    } else {
+      maxFanfics = await Fanfic.find({ user: userId }, "_id name").countDocuments();
+      fanficsQuery = Fanfic.find({ user: userId }, "_id name");
+    }
+    if (sortField && sortDirection) {
+      fanficsQuery.sort(`${sortDirection === "down" ? "-" : ""}${sortField}`);
+    }
+    if (pageSize && currentPage) {
+      fanficsQuery.skip(pageSize * (currentPage - 1)).limit(+pageSize);
+    }
+    const fanfics = await fanficsQuery;
     return res.status(200).json({
       message: "Successful user fanfics query.",
-      fanfics
+      data: fanfics,
+      maxFanfics
     });
   } catch (err) {
     next(err);
@@ -74,11 +91,29 @@ exports.getUserFanfics = async (req, res, next) => {
 exports.getUserFavorites = async (req, res, next) => {
   try {
     const userId = req.params.userId;
-    const favorites = await Favorite.find({ user: userId }, "fanfic")
-    .populate({ path: "fanfic", select: "_id name rating fandom lastUpdate" });
+    const { sortField, sortDirection, pageSize, currentPage, fandom } = req.query;
+    const favorites = await Favorite.find({ user: userId }, "fanfic");
+    const fanficsIds = favorites.map(favorite => favorite.fanfic);
+    let fanficsQuery;
+    let maxFanfics;
+    if (fandom && fandom !== "all") {
+      maxFanfics = await Fanfic.find({ _id: fanficsIds, fandom }, "_id name").countDocuments();
+      fanficsQuery = Fanfic.find({ _id: fanficsIds, fandom }, "_id name");
+    } else {
+      maxFanfics = await Fanfic.find({ _id: fanficsIds }, "_id name").countDocuments();
+      fanficsQuery = Fanfic.find({ _id: fanficsIds }, "_id name");
+    }
+    if (sortField && sortDirection) {
+      fanficsQuery.sort(`${sortDirection === "down" ? "-" : ""}${sortField}`);
+    }
+    if (pageSize && currentPage) {
+      fanficsQuery.skip(pageSize * (currentPage - 1)).limit(+pageSize);
+    }
+    const fanfics = await fanficsQuery;
     return res.status(200).json({
       message: "Successful user favorites query.",
-      favorites: favorites.map(favorite => favorite.fanfic)
+      data: fanfics,
+      maxFanfics
     });
   } catch (err) {
     next(err);

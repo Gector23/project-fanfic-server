@@ -41,6 +41,7 @@ exports.signUp = async (req, res, next) => {
         isActivated: user.isActivated,
         isInitializedPreferences: user.isInitializedPreferences,
         isAdmin: user.isAdmin,
+        preferences: user.preferences
       }
     });
   } catch (err) {
@@ -79,7 +80,8 @@ exports.signIn = async (req, res, next) => {
         email: user.email,
         isActivated: user.isActivated,
         isInitializedPreferences: user.isInitializedPreferences,
-        isAdmin: user.isAdmin
+        isAdmin: user.isAdmin,
+        preferences: user.preferences
       }
     });
   } catch (err) {
@@ -146,7 +148,8 @@ exports.refresh = async (req, res, next) => {
         email: user.email,
         isActivated: user.isActivated,
         isInitializedPreferences: user.isInitializedPreferences,
-        isAdmin: user.isAdmin
+        isAdmin: user.isAdmin,
+        preferences: user.preferences
       }
     });
   } catch (err) {

@@ -11,7 +11,7 @@ exports.userLastUpdateNow = async user => {
   }
 };
 
-exports.fanficRelation = async (user, fanfic) => {
+exports.fanficRelations = async (user, fanfic) => {
   try {
     let userRate = null;
     let isFavorited = false;
