@@ -127,7 +127,7 @@ exports.update = async (req, res, next) => {
     if (!fanfic) {
       throw new Error("Fanfic not found.");
     }
-    if (isAdmin || fanfic.user === authId) {
+    if (isAdmin || fanfic.user.toString() === authId) {
       if (name) {
         fanfic.name = name;
       }
@@ -218,6 +218,30 @@ exports.removeFavorite = async (req, res, next) => {
     userService.userLastUpdateNow(user);
     return res.status(200).json({
       message: "Fanfic removed from favorites."
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.search = async (req, res, next) => {
+  try {
+    const { searchString, pageSize, currentPage } = req.query;
+    const fanfics = await Fanfic.find({$text: {$search: searchString}}, "_id");
+    let searchedFanfics = fanfics.map(fanfic => fanfic._id);
+    const chapters = await Chapter.find({$text: {$search: searchString}, fanfic: {$nin: searchedFanfics}}, "fanfic");
+    searchedFanfics.push(
+      ...chapters.map(chapter => chapter.fanfic)
+    );
+    const fanficsQuery = Fanfic.find({_id: {$in: searchedFanfics}}, "_id name");
+    if (pageSize && currentPage) {
+      fanficsQuery.skip(pageSize * (currentPage - 1)).limit(+pageSize);
+    }
+    const data = await fanficsQuery;
+    return res.status(200).json({
+      message: "Successful search.",
+      data,
+      maxFanfics: searchedFanfics.length
     });
   } catch (err) {
     next(err);

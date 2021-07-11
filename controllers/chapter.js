@@ -9,7 +9,7 @@ exports.create = async (req, res, next) => {
     const { name, content, fanfic } = req.body;
     const isOwner = await fanficService.isOwner(authId, fanfic);
     if (isOwner) {
-      const chapterCount = await Chapter.estimatedDocumentCount({ fanfic });
+      const chapterCount = await Chapter.find({ fanfic }).countDocuments();
       const chapter = await Chapter.create({
         fanfic,
         name,

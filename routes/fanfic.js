@@ -6,9 +6,10 @@ const fanficController = require("../controllers/fanfic");
 
 const router = express.Router();
 
+router.get("/", fanficController.getFanfics);
+router.get("/search", fanficController.search);
 router.post("/create", checkAuth, fanficController.create);
 router.get("/:fanficId", fanficController.getFanfic);
-router.get("/", fanficController.getFanfics);
 router.get("/:fanficId/last-update", fanficController.getFanficUpdate);
 router.get("/:fanficId/chapters", fanficController.getFanficChapters);
 router.patch("/update/:fanficId", checkAuth, fanficController.update);
