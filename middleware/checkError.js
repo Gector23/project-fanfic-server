@@ -1,32 +1,68 @@
 module.exports = (err, req, res, next) => {
   console.log(err);
   switch (err.message) {
+    case "Already admin.":
+      res.status(400).json({
+        message: err.message
+      });
+      break;
+
+    case "Not admin.":
+      res.status(400).json({
+        message: err.message
+      });
+      break;
+
+    case "Already blocked.":
+      res.status(400).json({
+        message: err.message
+      });
+      break;
+
+    case "Not blocked.":
+      res.status(400).json({
+        message: err.message
+      });
+      break;
+
     case "Email already exists.":
-      res.status(403).json({
+      res.status(400).json({
         message: err.message
       });
       break;
 
     case "Incorrect email.":
-      res.status(403).json({
+      res.status(400).json({
         message: err.message
       });
       break;
 
     case "Incorrect password.":
-      res.status(403).json({
+      res.status(400).json({
         message: err.message
       });
       break;
 
     case "Incorrect activation link.":
-      res.status(403).json({
+      res.status(400).json({
         message: err.message
       });
       break;
 
     case "Auth failed.":
       res.status(401).json({
+        message: err.message
+      });
+      break;
+
+    case "No access rights.":
+      res.status(403).json({
+        message: err.message
+      });
+      break;
+
+    case "You are blocked.":
+      res.status(403).json({
         message: err.message
       });
       break;
@@ -72,7 +108,7 @@ module.exports = (err, req, res, next) => {
         message: err.message
       });
       break;
-      
+
     default:
       res.status(500).json({
         message: "Internal Server Error."

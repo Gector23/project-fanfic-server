@@ -1,6 +1,7 @@
 const tokenService = require("../services/tokenService");
+const userService = require("../services/userService");
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
   try {
     const authorization = req.headers.authorization;
     if (!authorization) {
@@ -18,6 +19,9 @@ module.exports = (req, res, next) => {
       return next();
     }
     req.userData = tokenPayload;
+    if (tokenPayload.isAdmin) {
+      req.userData.isAdmin = await userService.isAdmin(tokenPayload._id);
+    }
     next();
   } catch (err) {
     next(err);

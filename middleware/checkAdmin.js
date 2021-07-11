@@ -1,7 +1,7 @@
 module.exports = (req, res, next) => {
   try {
-    if (!req.userData._id) {
-      throw new Error("Auth failed.");
+    if (!req.userData.isAdmin) {
+      throw new Error("No access rights.");
     }
     next();
   } catch (err) {

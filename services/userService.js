@@ -1,7 +1,19 @@
 const User = require("../models/user");
 
-const rateService = require("./rateService");
-const favoriteService = require("./favorite");
+const favoriteService = require("./favoriteService");
+const tokenService = require("../services/tokenService");
+const fanficService = require("../services/fanficService");
+const rateService = require("../services/rateService");
+const likeService = require("../services/likeService");
+
+exports.isAdmin = async userId => {
+  try {
+    const user =  await User.findById(userId, "isAdmin");
+    return user.isAdmin;
+  } catch (err) {
+    return err;
+  }
+};
 
 exports.userLastUpdateNow = async user => {
   try {
@@ -25,6 +37,18 @@ exports.fanficRelations = async (user, fanfic) => {
       userRate,
       isFavorited
     };
+  } catch (err) {
+    return err;
+  }
+};
+
+exports.removeUserData = async userId => {
+  try {
+    await tokenService.removeUserToken(userId);
+    await fanficService.removeUserFanfics(userId);
+    await favoriteService.removeUserFavorites(userId);
+    await rateService.removeUserRates(userId);
+    await likeService.removeUserLikes(userId);
   } catch (err) {
     return err;
   }

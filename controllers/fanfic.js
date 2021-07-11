@@ -1,11 +1,11 @@
 const Fanfic = require("../models/fanfic");
 const Chapter = require("../models/chapter");
-const Favorite = require("../models/favorite");
 const Tag = require("../models/tag");
 
+const fanficService = require("../services/fanficService");
 const userService = require("../services/userService");
 const rateService = require("../services/rateService");
-const favoriteService = require("../services/favorite");
+const favoriteService = require("../services/favoriteService");
 
 exports.create = async (req, res, next) => {
   try {
@@ -120,38 +120,43 @@ exports.getFanficChapters = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
   try {
+    const { _id: authId, isAdmin } = req.userData;
     const fanficId = req.params.fanficId;
     const { name, fandom, description, tags } = req.body;
     const fanfic = await Fanfic.findById(fanficId);
     if (!fanfic) {
       throw new Error("Fanfic not found.");
     }
-    if (name) {
-      fanfic.name = name;
-    }
-    if (fandom) {
-      fanfic.fandom = fandom;
-    }
-    if (description) {
-      fanfic.description = description;
-    }
-    if (tags) {
-      let fanficTags = [];
-      for (const tag of tags) {
-        if (tag._id) {
-          fanficTags.push(tag._id);
-        } else {
-          const newTag = await Tag.create({ value: tag.value });
-          fanficTags.push(newTag._id);
-        }
+    if (isAdmin || fanfic.user === authId) {
+      if (name) {
+        fanfic.name = name;
       }
-      fanfic.tags = fanficTags;
+      if (fandom) {
+        fanfic.fandom = fandom;
+      }
+      if (description) {
+        fanfic.description = description;
+      }
+      if (tags) {
+        let fanficTags = [];
+        for (const tag of tags) {
+          if (tag._id) {
+            fanficTags.push(tag._id);
+          } else {
+            const newTag = await Tag.create({ value: tag.value });
+            fanficTags.push(newTag._id);
+          }
+        }
+        fanfic.tags = fanficTags;
+      }
+      fanfic.lastUpdate = Date.now();
+      await fanfic.save();
+      return res.status(200).json({
+        message: "Successful fanfic update."
+      });
+    } else {
+      throw new Error("No access rights.");
     }
-    fanfic.lastUpdate = Date.now();
-    await fanfic.save();
-    return res.status(200).json({
-      message: "Successful fanfic update."
-    });
   } catch (err) {
     next(err);
   }
@@ -221,18 +226,22 @@ exports.removeFavorite = async (req, res, next) => {
 
 exports.delete = async (req, res, next) => {
   try {
-    const user = req.userData._id;
+    const { _id: authId, isAdmin } = req.userData;
     const fanficId = req.params.fanficId;
-    const fanfic = await Fanfic.findByIdAndDelete(fanficId);
-    if (!fanfic) {
-      throw new Error("Fanfic not found.");
+    const isOwner = await fanficService.isOwner(authId, fanficId);
+    if (isAdmin || isOwner) {
+      const fanfic = await Fanfic.findByIdAndDelete(fanficId);
+      if (!fanfic) {
+        throw new Error("Fanfic not found.");
+      }
+      await fanficService.removeFanficData(fanficId);
+      await userService.userLastUpdateNow(fanfic.user);
+      return res.status(200).json({
+        message: "Successful fanfic delete."
+      });
+    } else {
+      throw new Error("No access rights.");
     }
-    await Chapter.deleteMany({ fanfic: fanfic._id });
-    await Favorite.deleteMany({ fanfic: fanfic._id });
-    userService.userLastUpdateNow(user);
-    return res.status(200).json({
-      message: "Successful fanfic delete."
-    });
   } catch (err) {
     next(err);
   }

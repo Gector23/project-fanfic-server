@@ -24,7 +24,8 @@ exports.signUp = async (req, res, next) => {
     await mailService.sendActivationMail(email, activationLink);
     const tokens = tokenService.generateTokens({
       _id: user._id,
-      email: user.email
+      email: user.email,
+      isAdmin: user.isAdmin
     });
     await tokenService.saveRefreshToken(user._id, tokens.refreshToken);
     res.cookie("refreshToken", tokens.refreshToken, {
@@ -41,6 +42,7 @@ exports.signUp = async (req, res, next) => {
         isActivated: user.isActivated,
         isInitializedPreferences: user.isInitializedPreferences,
         isAdmin: user.isAdmin,
+        isBlocked: user.isBlocked,
         preferences: user.preferences
       }
     });
@@ -62,7 +64,8 @@ exports.signIn = async (req, res, next) => {
     }
     const tokens = tokenService.generateTokens({
       _id: user._id,
-      email: user.email
+      email: user.email,
+      isAdmin: user.isAdmin
     });
     await tokenService.saveRefreshToken(user._id, tokens.refreshToken);
     res.cookie("refreshToken", tokens.refreshToken, {
@@ -81,6 +84,7 @@ exports.signIn = async (req, res, next) => {
         isActivated: user.isActivated,
         isInitializedPreferences: user.isInitializedPreferences,
         isAdmin: user.isAdmin,
+        isBlocked: user.isBlocked,
         preferences: user.preferences
       }
     });
@@ -132,7 +136,8 @@ exports.refresh = async (req, res, next) => {
     const user = await User.findById(tokenPayload._id);
     const tokens = tokenService.generateTokens({
       _id: user._id,
-      email: user.email
+      email: user.email,
+      isAdmin: user.isAdmin
     });
     await tokenService.saveRefreshToken(user._id, tokens.refreshToken);
     res.cookie("refreshToken", tokens.refreshToken, {
@@ -149,6 +154,7 @@ exports.refresh = async (req, res, next) => {
         isActivated: user.isActivated,
         isInitializedPreferences: user.isInitializedPreferences,
         isAdmin: user.isAdmin,
+        isBlocked: user.isBlocked,
         preferences: user.preferences
       }
     });

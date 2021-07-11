@@ -41,6 +41,10 @@ exports.removeRefreshToken = async refreshToken => {
   return await Token.deleteOne({ refreshToken });
 };
 
+exports.removeUserToken = async user => {
+  return await Token.deleteOne({ user });
+};
+
 exports.findRefreshToken = async refreshToken => {
   return await Token.findOne({ refreshToken });
 };

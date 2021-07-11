@@ -8,6 +8,7 @@ const userSchema = mongoose.Schema({
   isInitializedPreferences: {type: Boolean, default: false},
   preferences : [{ type: mongoose.Schema.Types.ObjectId, ref: "Fandom", default: [] }],
   isAdmin: {type: Boolean, default: false},
+  isBlocked: {type: Boolean, default: false},
   signUp: {type: Date, default: Date.now},
   lastSignIn: {type: Date, default: Date.now},
   lastUpdate: { type: Date, default: Date.now },

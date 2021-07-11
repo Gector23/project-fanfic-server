@@ -11,6 +11,7 @@ const fandomRouter = require("./routes/fandom");
 const tagRouter = require("./routes/tag");
 
 const authData = require("./middleware/authData");
+const checkBlock = require("./middleware/checkBlock");
 const checkError = require("./middleware/checkError");
 
 const app = express();
@@ -23,6 +24,7 @@ app.use(cors({
 }));
 app.use(authData);
 app.use("/api/auth", authRouter);
+app.use(checkBlock);
 app.use("/api/user", userRouter);
 app.use("/api/fanfic", fanficRouter);
 app.use("/api/chapter", chapterRouter);

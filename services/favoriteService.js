@@ -24,3 +24,19 @@ exports.isFavorited = async (user, fanfic) => {
     return err;
   }
 };
+
+exports.removeUserFavorites = async user => {
+  try {
+    return await Favorite.deleteMany({ user });
+  } catch (err) {
+    return err;
+  }
+};
+
+exports.removeFanficFavorites = async fanfic => {
+  try {
+    return await Favorite.deleteMany({ fanfic });
+  } catch (err) {
+    return err;
+  }
+};

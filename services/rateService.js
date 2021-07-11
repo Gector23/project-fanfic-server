@@ -19,3 +19,19 @@ exports.getRate = async (user, fanfic) => {
     return err;
   }
 };
+
+exports.removeUserRates = async user => {
+  try {
+    return await Rate.deleteMany({ user });
+  } catch (err) {
+    return err;
+  }
+};
+
+exports.removeFanficRates = async fanfic => {
+  try {
+    return await Rate.deleteMany({ fanfic });
+  } catch (err) {
+    return err;
+  }
+};
