@@ -49,6 +49,12 @@ module.exports = (err, req, res, next) => {
       });
       break;
 
+    case "The chapter file is not a image.":
+      res.status(400).json({
+        message: err.message
+      });
+      break;
+
     case "Auth failed.":
       res.status(401).json({
         message: err.message

@@ -1,7 +1,10 @@
+const formidable = require("formidable");
+
 const Chapter = require("../models/chapter");
 
 const fanficService = require("../services/fanficService");
 const likeService = require("../services/likeService");
+const imageServise = require("../services/imageService");
 
 exports.create = async (req, res, next) => {
   try {
@@ -134,6 +137,48 @@ exports.move = async (req, res, next) => {
   }
 };
 
+exports.uploadImage = async (req, res, next) => {
+  try {
+    const { _id: authId, isAdmin } = req.userData;
+    const chapterId = req.params.chapterId;
+    const chapter = await Chapter.findById(chapterId);
+    if (!chapter) {
+      throw new Error("Chapter not found.");
+    }
+    const isOwner = await fanficService.isOwner(authId, chapter.fanfic);
+    if (isAdmin || isOwner) {
+      const form = formidable({ multiples: true });
+      const formfields = await new Promise((resolve, reject) => {
+        form.parse(req, (err, fields, files) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(files);
+        });
+      });
+      if (!formfields.image.type.match(/image/)) {
+        throw new Error("The chapter file is not a image.");
+      }
+      if (chapter.cloudinaryPublicId) {
+        await imageServise.removeImage(chapter.cloudinaryPublicId);
+      }
+      const uploadResponse = await imageServise.uploadImage(formfields.image.path);
+      chapter.imageUrl = uploadResponse.url;
+      chapter.cloudinaryPublicId = uploadResponse.public_id;
+      chapter.lastUpdate = Date.now();
+      await chapter.save();
+      return res.status(200).json({
+        message: "Successful upload image."
+      });
+    } else {
+      throw new Error("No access rights.");
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.like = async (req, res, next) => {
   try {
     const user = req.userData._id;
@@ -193,6 +238,7 @@ exports.delete = async (req, res, next) => {
       await Chapter.findByIdAndDelete(chapterId);
       await likeService.removeChapterLikes(chapterId);
       await fanficService.fanficLastUpdateNow(chapter.fanfic);
+      await imageServise.removeImage(chapter.cloudinaryPublicId);
       return res.status(200).json({
         message: "Successful chapter delete."
       });
