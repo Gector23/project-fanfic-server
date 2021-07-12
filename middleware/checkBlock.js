@@ -5,6 +5,9 @@ module.exports = async (req, res, next) => {
     const { _id: authId } = req.userData;
     if (authId) {
       const user = await User.findById(authId, "isBlocked");
+      if (!user) {
+        throw new Error("Account deleted.");
+      }
       if (user.isBlocked) {
         throw new Error("You are blocked.");
       }  

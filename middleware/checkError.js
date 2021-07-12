@@ -73,6 +73,12 @@ module.exports = (err, req, res, next) => {
       });
       break;
 
+    case "Account deleted.":
+      res.status(403).json({
+        message: err.message
+      });
+      break;
+
     case "Fanfic not found.":
       res.status(404).json({
         message: err.message
